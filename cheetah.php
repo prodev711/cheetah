@@ -26,7 +26,7 @@ function init_cheetah() {
 
 add_action('plugins_loaded', 'init_cheetah');
 
-function custom_plugin_rewrite_rules() {
+function custom_plugin_rewrite_rules1() {
     add_rewrite_rule(
         '^cheetah/?$',
         'wp-content/plugins/cheetah/cryptohome/step1.php',
@@ -34,21 +34,43 @@ function custom_plugin_rewrite_rules() {
     );
 }
 
-add_action('init', 'custom_plugin_rewrite_rules');
+function custom_plugin_rewrite_rules2() {
+    add_rewrite_rule(
+        '^payment/?$',
+        'wp-content/plugins/cheetah/cryptohome/step3.php',
+        'top'
+    );
+}
 
-function custom_plugin_query_vars($query_vars) {
+add_action('init', 'custom_plugin_rewrite_rules1');
+add_action('init', 'custom_plugin_rewrite_rules2');
+
+function custom_plugin_query_vars1($query_vars) {
     $query_vars[] = 'cheetah';
     return $query_vars;
 }
-add_filter('query_vars', 'custom_plugin_query_vars');
+function custom_plugin_query_vars2($query_vars){
+    $query_vars[] = 'payment';
+    return $query_vars;
+}
+add_filter('query_vars', 'custom_plugin_query_vars1');
+add_filter('query_vars', 'custom_plugin_query_vars2');
 
-function custom_plugin_template_include($template) {
+function custom_plugin_template_include1($template) {
     if (get_query_var('cheetah')) {
-        $template = plugin_dir_path(__FILE__) . 'cryptohome/sep1.php';
+        $template = plugin_dir_path(__FILE__) . 'cryptohome/step1.php';
     }
     return $template;
 }
-add_filter('template_include', 'custom_plugin_template_include');
+
+function custom_plugin_template_include2($template){
+    if ( get_query_var('payment')) {
+        $template = plugin_dir_path(__FILE__). 'cryptohome/step3.php';
+    }
+    return $template;
+}
+add_filter('template_include', 'custom_plugin_template_include1');
+add_filter('template_include', 'custom_plugin_template_include2');
 
 function add_bootstrap() {
     wp_enqueue_style( 'bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css' );
