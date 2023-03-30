@@ -23,8 +23,8 @@
       name="description"
       content="Meta descriptions may be included in search results to concisely summarize page content."
     />
-    <link rel="shortcut icon" href="/wp-content/plugins/cheetah/cryptohome/images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="/wp-content/plugins/cheetah/cryptohome/css/main.css" />
+    <link rel="shortcut icon" href="wp-content/plugins/cheetah/cryptohome/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/css/main.css" />
   </head>
 
   <body>
