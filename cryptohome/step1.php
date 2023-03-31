@@ -9,9 +9,6 @@
   }
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
-  // $ch = curl_init();
-  // curl_setopt($ch,CURLOPT_URL,'https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=BTC,ETH');
-  // curl_exec($ch);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -122,8 +119,8 @@
       const orderId = "<?php echo $orderId;?>" ;
       var checkoutId = "";
       const query = `
-        query GenerateCheckoutSession($apiKey: String!, $basketId: String!, $userId: String!) {
-          generateCheckoutSession(apiKey: $apiKey, basketId: $basketId, userId: $userId) {
+        query GenerateCheckoutSession($apiKey: String!, $orderId: String!, $userId: String!) {
+          generateCheckoutSession(apiKey: $apiKey, orderId: $orderId, userId: $userId) {
             chainIds
             chains {
               _id
@@ -150,13 +147,14 @@
           query:query,
           variables: {
             apiKey: apiKey,
-            basketId: orderId,
+            orderId: orderId,
             userId: userId
           },
           operationName: "GenerateCheckoutSession"
         })
       }).then(response => response.json())
       .then(data => {
+        console.log(data);
         window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
         $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })

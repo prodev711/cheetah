@@ -100,9 +100,13 @@ function get_basket_total_amount( $basket_id ) {
 
 function user_api_endpoint($request) {
     $user_id = $request['user_id'];
-    $apiKey = $request['API_key'];
+    $apiKey = $request['api_key'];
+    if ( ! $apiKey ){
+        echo json_encode(['error' => 'API key is missing']);
+        exit;
+    }
     if ( $apiKey != get_option('custom_cheetah_api_key') ){
-        echo json_encode(["error" => "your API_key doesn't wrong"]);
+        echo json_encode(["error" => "API key is invalid"]);
         exit;
     }
     $user = get_user_by( 'ID', $user_id );
@@ -114,13 +118,17 @@ function user_api_endpoint($request) {
 
 function basket_api_endpoint($request) {
     $orderId = $request['order_id'];
-    $apiKey = $request['API_key'];
+    $apiKey = $request['api_key'];
+    if ( ! $apiKey ){
+        echo json_encode(['error' => 'API key is missing']);
+        exit;
+    }
     if ( $apiKey != get_option('custom_cheetah_api_key') ){
-        echo json_encode(["error" => "your API_key doesn't wrong"]);
+        echo json_encode(["error" => "API key is invalid"]);
         exit;
     }
     $order = json_decode(wc_get_order($orderId));
-    $amount = $order->total;
+    $amount = floatval($order->total);
     header ('Content-Type: application/json');
     echo json_encode( ['total' => $amount]);
 }
