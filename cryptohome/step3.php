@@ -3,8 +3,18 @@
   $method = $_GET['method'] ;
   $address = $_GET['address'];
   $product = json_decode(WC()->session->get('order_product'));
-  $amount = $product->total;
-  var_dump(get_option('user_id'));
+  $userId = get_current_user_id();
+  global $woocommerce ;
+  $cart = $woocommerce->cart;
+  $apiKey = get_option('custom_cheetah_api_key');
+  $cart_items = $cart->get_cart();
+  $basketId = '';
+  foreach($cart_items as $cart_item_key => $cart_item){
+    $product_id = $cart_item['product_id'];
+    $quantity = $cart_item['quantity'];
+    $basketId .= $product_id."_".$quantity.';';
+  }
+  $basketId = rtrim($basketId);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +65,7 @@
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
           <h4>Transaction XY08122022</h4>
-          <h2 class="mb-3 amountvalue"><?php echo $amount ;?>€</h2>
+          <h2 class="mb-3 amountvalue">... ETH</h2>
           <h6 class="text-light">À régler avant le 30 Septembre 2022</h6>
         </div>
 
@@ -88,7 +98,7 @@
             href="#"
             class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_ether"
             title=`Payer ${$amount}€ avec Metamask`
-            >Payer <?php echo $amount;?>€ avec Metamask</a
+            >Payer ... ETH</a
           >
           <h6 class="mb-3">
             Ou envoyez 154,870000 USDT (en un seul paiement) à l’adresse
@@ -115,9 +125,11 @@
 
     <!-- JavaScripts -->
     <script>
-      var Amount = <?php echo $amount ;?>;
       var Address = '<?php echo $address; ?>';
       var Method = <?php echo $method ;?>;
+      var apiKey = '<?php echo $apiKey;?>';
+      var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
+      var Amount = checkoutSession.price ;
       const url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=eur";
       fetch(url)
         .then(response => response.json())
