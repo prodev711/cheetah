@@ -1,13 +1,41 @@
 <?php 
   // var_dump($_SERVER['REQUEST_SCHEME']);
   require_once (__DIR__.'/../../../../wp-load.php');
-  date_default_timezone_set('America/New_York');
   $product = json_decode(WC()->session->get('order_product'));
+  $basket_id = 1 ;
+  $order = wc_get_order( $basket_id );
+  // Check if the order exists and is not empty
+  if ( $order && $order->get_item_count() > 0 ) {
+      // Get the total amount for the order
+      $total_amount = $order->get_total();
+      
+      // Return the total amount
+      return $total_amount;
+  }
+
+
+
+
+
+  date_default_timezone_set('America/New_York');
+  
   $amount = $product->total;
   if ( WC()->session->get('order_id') == NULL ) {
     echo '<h1>There is no order</h1>';
     exit;
   }
+  $userId = get_current_user_id();
+  global $woocommerce ;
+  $cart = $woocommerce->cart;
+  $apiKey = get_option('custom_cheetah_api_key');
+  $cart_items = $cart->get_cart();
+  $basketId = '';
+  foreach($cart_items as $cart_item_key => $cart_item){
+    $product_id = $cart_item['product_id'];
+    $quantity = $cart_item['quantity'];
+    $basketId .= $product_id."_".$quantity.';';
+  }
+  $basketId = rtrim($basketId);
   // $ch = curl_init();
   // curl_setopt($ch,CURLOPT_URL,'https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=BTC,ETH');
   // curl_exec($ch);
@@ -60,7 +88,7 @@
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
           <h4>Transaction XY08122022</h4>
-          <h2 class="mb-3"><?php echo $amount ;?>€</h2>
+          <h2 class="mb-3 amountvalue">... €</h2>
           <h6 class="text-light">À régler avant le 30 Septembre 2022</h6>
         </div>
 
@@ -113,6 +141,52 @@
     </div>
 
     <!-- JavaScripts -->
+    <script>
+      const apiKey = "<?php echo $apiKey;?>";
+      const userId = "<?php echo $userId ;?>";
+      const basketId = "<?php echo $basketId;?>" ;
+      var checkoutId = "";
+      const query = `
+        query GenerateCheckoutSession($apiKey: String!, $basketId: String!, $userId: String!) {
+          generateCheckoutSession(apiKey: $apiKey, basketId: $basketId, userId: $userId) {
+            chainIds
+            chains {
+              _id
+              address
+              chainType
+              createdAt
+              imageUrl
+              name
+              symbol
+              updatedAt
+            }
+            checkoutId
+            price
+          }
+        }
+      `;
+      fetch("https://cheetah-backend.herokuapp.com/graphql",{
+        method : "POST",
+        headers : {
+          "Content-Type": "application/json",
+          "Accept" : "application/json"
+        },
+        body: JSON.stringify({
+          query:query,
+          variables: {
+            apiKey: apiKey,
+            basketId: basketId,
+            userId: userId
+          },
+          operationName: "GenerateCheckoutSession"
+        })
+      }).then(response => response.json())
+      .then(data => {
+        window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
+        $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
+      })
+      .catch(err => console.error(err));
+    </script>
     <script src="wp-content/plugins/cheetah/cryptohome/js/main.js"></script>
   </body>
 </html>

@@ -77,3 +77,49 @@ function add_bootstrap() {
     wp_enqueue_script( 'bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js', array( 'jquery' ), '', true );
 }
 add_action( 'admin_enqueue_scripts', 'add_bootstrap' );
+
+
+function get_basket_total_amount( $basket_id ) {
+    // Get the order object for the given basket_id
+    $order = wc_get_order( $basket_id );
+    
+    // Check if the order exists and is not empty
+    if ( $order && $order->get_item_count() > 0 ) {
+        // Get the total amount for the order
+        $total_amount = $order->get_total();
+        
+        // Return the total amount
+        return $total_amount;
+    }
+    
+    // If the order does not exist or is empty, return 0
+    return 0;
+}
+
+
+
+function user_api_endpoint($request) {
+    $user_id = $request['user_id'];
+    $user = get_user_by( 'ID', $user_id );
+    $data = $user->data;
+    header( 'Content-Type: application/json' );
+    echo json_encode( $data );
+}
+
+function basket_api_endpoint($request) {
+    $basket_id = $request['basket_id'];
+    $amount = get_basket_total_amount($basket_id) ;
+    header ('Content-Type: application/json');
+    echo json_encode( $amount );
+}
+
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'cheetah/v1', '/user', array(
+        'methods' => 'GET',
+        'callback' => 'user_api_endpoint',
+    ) );
+    register_rest_route( 'cheetah/v1','/basket',array(
+        'methods' => 'GET',
+        'callback' => 'basket_api_endpoint'
+    ));
+} );
