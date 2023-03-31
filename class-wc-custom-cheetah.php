@@ -186,7 +186,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
 		// $order->payment_complete();
 	
 		// Redirect to custom HTML page
-		$redirect_url = 'http://localhost/cheetah';
+		$redirect_url = home_url().'/cheetah';
 		WC()->session->delete_session('order_id');
 		WC()->session->set('order_id',$order_id);
 		WC()->session->set('order_product',$order);

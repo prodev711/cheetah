@@ -9,6 +9,7 @@ $(document).ready(function () {
     if ( err ){
       console.error(err);
     } else {
+      console.log(BlockNumber);
     }
   })
   //Prevent Page Reload on all # links
@@ -87,8 +88,7 @@ $(document).ready(function () {
           checkTrans(hash);
         });
       });
-      checkTrans('0x2446f1fd773fbb9f080e674b60c6a033c7ed7427b8b9413cf28a2a4a6da9b56c');
-
+      // checkTrans('0x2446f1fd773fbb9f080e674b60c6a033c7ed7427b8b9413cf28a2a4a6da9b56c');
   })
   const checkTrans = (hash) => {
     console.log(`Transaction hash:${hash}`);

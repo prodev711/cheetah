@@ -155,15 +155,35 @@ function order_api_endpoint($request) {
         exit;
     }
     $order = wc_get_order($order_id);
+    echo json_encode(['error' => $order]);
+    exit;
+    if ( ! $order ){
+        echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
+    if ($order && !$order->customer_id) {
+        echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
+    $order->add_order_note(
+        sprintf(
+            __( 'Payment received. Transaction ID: %s', 'textdomain' ), $transaction_hash
+        )
+    );
     $order->update_meta_data('order_content',json_encode([
         'order_id' => $order_id,
         'transaction_hash' => $transaction_hash,
         'created_at' => $created_at,
         'user_id' => $user_id
     ]));
+    $order->update_status( 'completed' );
+    $saveId = $order->save();
     echo json_encode([
-        "order_id" => $order->save()
+        "order_id" => $saveId
     ]);
+    ob_clean();
+    $url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
+    wp_redirect($url);
 }
 
 add_action( 'rest_api_init', function () {

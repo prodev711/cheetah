@@ -117,6 +117,7 @@
       const apiKey = "<?php echo $apiKey;?>";
       const userId = "<?php echo $userId ;?>";
       const orderId = "<?php echo $orderId;?>" ;
+      console.log(orderId);
       var checkoutId = "";
       const query = `
         query GenerateCheckoutSession($apiKey: String!, $orderId: String!, $userId: String!) {
@@ -154,7 +155,6 @@
         })
       }).then(response => response.json())
       .then(data => {
-        console.log(data);
         window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
         $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })
