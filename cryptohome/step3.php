@@ -124,6 +124,8 @@
     </div>
 
     <!-- JavaScripts -->
+    <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
     <script>
       var Address = '<?php echo $address; ?>';
       var Method = <?php echo $method ;?>;
@@ -141,6 +143,7 @@
         })
         .catch(error => console.error(error));
     </script>
-    <script src="wp-content/plugins/cheetah/cryptohome/js/main.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
+    <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
   </body>
 </html>

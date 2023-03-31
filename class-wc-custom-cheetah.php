@@ -22,7 +22,7 @@ if ( !defined('ABSPATH')){
 class WC_Custom_Cheetah extends WC_Payment_Gateway {
     /** @var bool Whether or not logging is enabled */
 	public static $log_enabled = false;
-
+    public $api_key = "";
     /** @var WC_Logger Logger instance */
 	public static $log = false;
 	/**
@@ -56,6 +56,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
 
     public function woocommerce_validate_api_key() {
         $api_key = isset($_POST['woocommerce_cheetah_api_key']) ? $_POST['woocommerce_cheetah_api_key'] : '';
+        $this->api_key = $api_key;
         // update_option('custom_cheetah_api_key', $api_key);
         $result = $this->validate_api_key($api_key);
         if ( !$result['result'] ){
@@ -169,6 +170,9 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
             $result['message'] = 'API key is validated successfully';
             return $result;
         }
+    }
+    public function get_api_key() {
+        return $this->api_key;
     }
 
     /**
