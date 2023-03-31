@@ -100,17 +100,29 @@ function get_basket_total_amount( $basket_id ) {
 
 function user_api_endpoint($request) {
     $user_id = $request['user_id'];
+    $apiKey = $request['API_key'];
+    if ( $apiKey != get_option('custom_cheetah_api_key') ){
+        echo json_encode(["error" => "your API_key doesn't wrong"]);
+        exit;
+    }
     $user = get_user_by( 'ID', $user_id );
     $data = $user->data;
+    $email = $data->user_email;
     header( 'Content-Type: application/json' );
-    echo json_encode( $data );
+    echo json_encode( ['email' => $email] );
 }
 
 function basket_api_endpoint($request) {
-    $basket_id = $request['basket_id'];
-    $amount = get_basket_total_amount($basket_id) ;
+    $orderId = $request['order_id'];
+    $apiKey = $request['API_key'];
+    if ( $apiKey != get_option('custom_cheetah_api_key') ){
+        echo json_encode(["error" => "your API_key doesn't wrong"]);
+        exit;
+    }
+    $order = json_decode(wc_get_order($orderId));
+    $amount = $order->total;
     header ('Content-Type: application/json');
-    echo json_encode( $amount );
+    echo json_encode( ['total' => $amount]);
 }
 
 add_action( 'rest_api_init', function () {
@@ -118,7 +130,7 @@ add_action( 'rest_api_init', function () {
         'methods' => 'GET',
         'callback' => 'user_api_endpoint',
     ) );
-    register_rest_route( 'cheetah/v1','/basket',array(
+    register_rest_route( 'cheetah/v1','/orderPrice',array(
         'methods' => 'GET',
         'callback' => 'basket_api_endpoint'
     ));

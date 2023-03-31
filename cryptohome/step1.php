@@ -1,41 +1,14 @@
 <?php 
   // var_dump($_SERVER['REQUEST_SCHEME']);
   require_once (__DIR__.'/../../../../wp-load.php');
-  $product = json_decode(WC()->session->get('order_product'));
-  $basket_id = 1 ;
-  $order = wc_get_order( $basket_id );
-  // Check if the order exists and is not empty
-  if ( $order && $order->get_item_count() > 0 ) {
-      // Get the total amount for the order
-      $total_amount = $order->get_total();
-      
-      // Return the total amount
-      return $total_amount;
-  }
-
-
-
-
-
   date_default_timezone_set('America/New_York');
-  
-  $amount = $product->total;
-  if ( WC()->session->get('order_id') == NULL ) {
+  $orderId = WC()->session->get('order_id');
+  if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
     exit;
   }
   $userId = get_current_user_id();
-  global $woocommerce ;
-  $cart = $woocommerce->cart;
   $apiKey = get_option('custom_cheetah_api_key');
-  $cart_items = $cart->get_cart();
-  $basketId = '';
-  foreach($cart_items as $cart_item_key => $cart_item){
-    $product_id = $cart_item['product_id'];
-    $quantity = $cart_item['quantity'];
-    $basketId .= $product_id."_".$quantity.';';
-  }
-  $basketId = rtrim($basketId);
   // $ch = curl_init();
   // curl_setopt($ch,CURLOPT_URL,'https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=BTC,ETH');
   // curl_exec($ch);
@@ -141,10 +114,12 @@
     </div>
 
     <!-- JavaScripts -->
+    <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
     <script>
       const apiKey = "<?php echo $apiKey;?>";
       const userId = "<?php echo $userId ;?>";
-      const basketId = "<?php echo $basketId;?>" ;
+      const orderId = "<?php echo $orderId;?>" ;
       var checkoutId = "";
       const query = `
         query GenerateCheckoutSession($apiKey: String!, $basketId: String!, $userId: String!) {
@@ -175,7 +150,7 @@
           query:query,
           variables: {
             apiKey: apiKey,
-            basketId: basketId,
+            basketId: orderId,
             userId: userId
           },
           operationName: "GenerateCheckoutSession"
@@ -187,6 +162,7 @@
       })
       .catch(err => console.error(err));
     </script>
-    <script src="wp-content/plugins/cheetah/cryptohome/js/main.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
+    <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
   </body>
 </html>
