@@ -9,9 +9,6 @@
   }
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
-  // $ch = curl_init();
-  // curl_setopt($ch,CURLOPT_URL,'https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=BTC,ETH');
-  // curl_exec($ch);
 ?>
 <!DOCTYPE html>
 <html lang="en">
