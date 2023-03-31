@@ -133,6 +133,59 @@ function basket_api_endpoint($request) {
     echo json_encode( ['total' => $amount]);
 }
 
+function order_api_endpoint($request) {
+    $order_id = $request['order_id'];
+    $transaction_hash = $request['transaction_hash'];
+    $created_at = $request['created_at'];
+    $user_id = $request['user_id'];
+    if ( ! $order_id ){
+        echo json_encode(["error" => "Order Id is missing"]);
+        exit;
+    }
+    if ( ! $transaction_hash ){
+        echo json_encode(['error' => 'TransactionHash is missing']);
+        exit;
+    }
+    if ( ! $user_id ) {
+        echo json_encode(['error' => 'userId is missing'] );
+        exit;
+    }
+    if ( ! $created_at ) {
+        echo json_encode(['error' => 'Create_at is missing']);
+        exit;
+    }
+    $order = wc_get_order($order_id);
+    echo json_encode(['error' => $order]);
+    exit;
+    if ( ! $order ){
+        echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
+    if ($order && !$order->customer_id) {
+        echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
+    $order->add_order_note(
+        sprintf(
+            __( 'Payment received. Transaction ID: %s', 'textdomain' ), $transaction_hash
+        )
+    );
+    $order->update_meta_data('order_content',json_encode([
+        'order_id' => $order_id,
+        'transaction_hash' => $transaction_hash,
+        'created_at' => $created_at,
+        'user_id' => $user_id
+    ]));
+    $order->update_status( 'completed' );
+    $saveId = $order->save();
+    echo json_encode([
+        "order_id" => $saveId
+    ]);
+    ob_clean();
+    $url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
+    wp_redirect($url);
+}
+
 add_action( 'rest_api_init', function () {
     register_rest_route( 'cheetah/v1', '/user', array(
         'methods' => 'GET',
@@ -141,5 +194,9 @@ add_action( 'rest_api_init', function () {
     register_rest_route( 'cheetah/v1','/orderPrice',array(
         'methods' => 'GET',
         'callback' => 'basket_api_endpoint'
+    ));
+    register_rest_route('cheetah/v1','/order',array(
+        'methods' => 'POST',
+        'callback' => 'order_api_endpoint'
     ));
 } );
