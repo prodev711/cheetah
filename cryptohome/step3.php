@@ -4,17 +4,7 @@
   $address = $_GET['address'];
   $product = json_decode(WC()->session->get('order_product'));
   $userId = get_current_user_id();
-  global $woocommerce ;
-  $cart = $woocommerce->cart;
   $apiKey = get_option('custom_cheetah_api_key');
-  $cart_items = $cart->get_cart();
-  $basketId = '';
-  foreach($cart_items as $cart_item_key => $cart_item){
-    $product_id = $cart_item['product_id'];
-    $quantity = $cart_item['quantity'];
-    $basketId .= $product_id."_".$quantity.';';
-  }
-  $basketId = rtrim($basketId);
 ?>
 <!DOCTYPE html>
 <html lang="en">

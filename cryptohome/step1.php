@@ -119,8 +119,8 @@
       const orderId = "<?php echo $orderId;?>" ;
       var checkoutId = "";
       const query = `
-        query GenerateCheckoutSession($apiKey: String!, $basketId: String!, $userId: String!) {
-          generateCheckoutSession(apiKey: $apiKey, basketId: $basketId, userId: $userId) {
+        query GenerateCheckoutSession($apiKey: String!, $orderId: String!, $userId: String!) {
+          generateCheckoutSession(apiKey: $apiKey, orderId: $orderId, userId: $userId) {
             chainIds
             chains {
               _id
@@ -147,13 +147,14 @@
           query:query,
           variables: {
             apiKey: apiKey,
-            basketId: orderId,
+            orderId: orderId,
             userId: userId
           },
           operationName: "GenerateCheckoutSession"
         })
       }).then(response => response.json())
       .then(data => {
+        console.log(data);
         window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
         $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })

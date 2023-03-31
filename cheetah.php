@@ -128,7 +128,7 @@ function basket_api_endpoint($request) {
         exit;
     }
     $order = json_decode(wc_get_order($orderId));
-    $amount = $order->total;
+    $amount = floatval($order->total);
     header ('Content-Type: application/json');
     echo json_encode( ['total' => $amount]);
 }
