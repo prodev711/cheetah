@@ -134,7 +134,8 @@
         })
         .catch(error => console.error(error));
     </script>
-    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
     <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
+    
   </body>
 </html>

@@ -3,6 +3,10 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   date_default_timezone_set('America/New_York');
   $orderId = WC()->session->get('order_id');
+  $order = WC()->session->get('order_product');
+//   $user_id = WC()->session->get('customer_id');
+//   var_dump($user_id);
+//   exit;
   if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
     exit;
@@ -151,13 +155,13 @@
         })
       }).then(response => response.json())
       .then(data => {
-          console.log(data.data.generateCheckoutSession);
+          console.log(data);
         window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
         $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })
-      .catch(err => console.error(err));
+      .catch(err => console.log(err));
     </script>
-    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
     <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
   </body>
 </html>

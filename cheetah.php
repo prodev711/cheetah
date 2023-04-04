@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Cheetah
 Plugin URI:   
-Description:  A custom payment gateway that allows your customers to pay with cryptocurrency like bitcoin or etherium
+Description:  A custom payment gateway that allows your customers to pay with ERC20, BEP20, SOL and MATIC network tokens
 Version:      
 Author:       
 Author URI:   
@@ -139,17 +139,6 @@ function order_api_endpoint($request) {
     $transaction_hash = $request['transaction_hash'];
     $created_at = $request['created_at'];
     $user_id = $request['user_id'];
-    $checkout_url = "http://localhost/shop";
-    wp_ob_end_flush_all();
-
-    // Redirect the user to the checkout page
-    wp_redirect( $checkout_url );
-    exit;
-
-    // Flush the output buffer and return the result
-    // $result = ob_get_clean();
-    // echo $result;
-    exit;
     if ( !$apiKey ){
         echo json_encode(['error' => 'API key is messing']);
         exit;
@@ -180,10 +169,10 @@ function order_api_endpoint($request) {
         echo json_encode(['error' => 'Order_id is invalid']);
         exit;
     }
-    // if ($orderobj && !$orderobj->customer_id) {
-    //     echo json_encode(['error' => 'Order_id is invalid']);
-    //     exit;
-    // }
+    if ($orderobj && !$orderobj->customer_id) {
+        echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
     $status = $order->get_status();
     if ( $status == "on-hold" || $status == "processing"){
         echo json_encode(['error' => 'Payment has been received and the order is being processed.']);
@@ -198,12 +187,8 @@ function order_api_endpoint($request) {
             __( 'Payment received. Transaction ID: %s', 'textdomain' ), $transaction_hash
         )
     );
-    exit;
     $order->update_meta_data('order_content',json_encode([
-        'order_id' => $order_id,
-        'transaction_hash' => $transaction_hash,
-        'created_at' => $created_at,
-        'user_id' => $user_id
+        'transaction_hash' => $transaction_hash
     ]));
     $order->update_status( 'completed' );
     $saveId = $order->save();
@@ -226,23 +211,7 @@ add_action( 'rest_api_init', function () {
         'callback' => 'basket_api_endpoint'
     ));
     register_rest_route('cheetah/v1','/order',array(
-        'methods' => 'GET',
+        'methods' => 'POST',
         'callback' => 'order_api_endpoint'
     ));
 } );
-
-// function handle_post_request() {
-//     if ( is_endpoint('thirdbackend') && $_SERVER['REQUEST_METHOD'] === "POST"){
-//         $order_id = $_POST['order_id'];
-//         wp_redirect('http://localhost/shop');
-//         exit;
-//     }
-// }
-
-// add_action('template_redirect','handle_post_request');
-
-// function order_custom_endpoint(){
-//     add_rewrite_endpoint('',EP_ROOT);
-// }
-
-// add_action('init','order_custom_endpoint');

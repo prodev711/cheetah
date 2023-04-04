@@ -1,6 +1,6 @@
 $(document).ready(function () {
   var connectedAccounts ;
-  if ( typeof web3 !== undefined ){
+  if ( typeof web3 !== "undefined" && web3.currentProvider !== null ){
     web3 = new Web3(web3.currentProvider);
   } else {
     web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
@@ -59,7 +59,7 @@ $(document).ready(function () {
         const account = accounts[0];
         window.location.href = `${homeUrl}/payment?method=${crypto}&address=${account}`;
       }).catch(error => {
-        console.error(error);
+          alert("Can't connect wallet");
       })
     }
   })
