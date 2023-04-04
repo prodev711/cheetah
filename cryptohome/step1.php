@@ -126,8 +126,8 @@
       console.log(orderId);
       var checkoutId = "";
       const query = `
-        query GenerateCheckoutSession($apiKey: String!, $orderId: Int!, $userId: Int!) {
-          generateCheckoutSession(apiKey: $apiKey, orderId: $orderId, userId: $userId) {
+        query GenerateCheckoutSession($apiKey: String!, $orderId: Int!) {
+          generateCheckoutSession(apiKey: $apiKey, orderId: $orderId) {
             chainIds
             chains {
               address
@@ -148,8 +148,7 @@
           query:query,
           variables: {
             apiKey: apiKey,
-            orderId: orderId,
-            userId: userId
+            orderId: orderId
           },
           operationName: "GenerateCheckoutSession"
         })
