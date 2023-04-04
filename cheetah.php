@@ -134,10 +134,30 @@ function basket_api_endpoint($request) {
 }
 
 function order_api_endpoint($request) {
+    $apiKey = $request['api_key'];
     $order_id = $request['order_id'];
     $transaction_hash = $request['transaction_hash'];
     $created_at = $request['created_at'];
     $user_id = $request['user_id'];
+    $checkout_url = "http://localhost/shop";
+    wp_ob_end_flush_all();
+
+    // Redirect the user to the checkout page
+    wp_redirect( $checkout_url );
+    exit;
+
+    // Flush the output buffer and return the result
+    // $result = ob_get_clean();
+    // echo $result;
+    exit;
+    if ( !$apiKey ){
+        echo json_encode(['error' => 'API key is messing']);
+        exit;
+    }
+    if ( $apiKey != get_option('custom_cheetah_api_key') ){
+        echo json_encode(["error" => "API key is invalid"]);
+        exit;
+    }
     if ( ! $order_id ){
         echo json_encode(["error" => "Order Id is missing"]);
         exit;
@@ -155,14 +175,22 @@ function order_api_endpoint($request) {
         exit;
     }
     $order = wc_get_order($order_id);
-    echo json_encode(['error' => $order]);
-    exit;
-    if ( ! $order ){
+    $orderobj = json_decode(wc_get_order($order_id));
+    if ( ! $orderobj ){
         echo json_encode(['error' => 'Order_id is invalid']);
         exit;
     }
-    if ($order && !$order->customer_id) {
-        echo json_encode(['error' => 'Order_id is invalid']);
+    // if ($orderobj && !$orderobj->customer_id) {
+    //     echo json_encode(['error' => 'Order_id is invalid']);
+    //     exit;
+    // }
+    $status = $order->get_status();
+    if ( $status == "on-hold" || $status == "processing"){
+        echo json_encode(['error' => 'Payment has been received and the order is being processed.']);
+        exit;
+    }
+    if ( $status == "completed"){
+        echo json_encode(['error' => 'Order has been processed and completed.']);
         exit;
     }
     $order->add_order_note(
@@ -170,6 +198,7 @@ function order_api_endpoint($request) {
             __( 'Payment received. Transaction ID: %s', 'textdomain' ), $transaction_hash
         )
     );
+    exit;
     $order->update_meta_data('order_content',json_encode([
         'order_id' => $order_id,
         'transaction_hash' => $transaction_hash,
@@ -182,8 +211,9 @@ function order_api_endpoint($request) {
         "order_id" => $saveId
     ]);
     ob_clean();
-    $url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
-    wp_redirect($url);
+    $redirect_url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
+	wp_redirect($redirect_url);
+    exit;
 }
 
 add_action( 'rest_api_init', function () {
@@ -196,7 +226,23 @@ add_action( 'rest_api_init', function () {
         'callback' => 'basket_api_endpoint'
     ));
     register_rest_route('cheetah/v1','/order',array(
-        'methods' => 'POST',
+        'methods' => 'GET',
         'callback' => 'order_api_endpoint'
     ));
 } );
+
+// function handle_post_request() {
+//     if ( is_endpoint('thirdbackend') && $_SERVER['REQUEST_METHOD'] === "POST"){
+//         $order_id = $_POST['order_id'];
+//         wp_redirect('http://localhost/shop');
+//         exit;
+//     }
+// }
+
+// add_action('template_redirect','handle_post_request');
+
+// function order_custom_endpoint(){
+//     add_rewrite_endpoint('',EP_ROOT);
+// }
+
+// add_action('init','order_custom_endpoint');

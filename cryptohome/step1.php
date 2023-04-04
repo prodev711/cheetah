@@ -7,6 +7,7 @@
     echo '<h1>There is no order</h1>';
     exit;
   }
+  $homeUrl = home_url();
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
 ?>
@@ -115,23 +116,18 @@
     <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
     <script>
       const apiKey = "<?php echo $apiKey;?>";
-      const userId = "<?php echo $userId ;?>";
-      const orderId = "<?php echo $orderId;?>" ;
+      const userId = <?php echo $userId ;?>;
+      const homeUrl = "<?php echo $homeUrl;?>";
+      const orderId = <?php echo $orderId;?> ;
       console.log(orderId);
       var checkoutId = "";
       const query = `
-        query GenerateCheckoutSession($apiKey: String!, $orderId: String!, $userId: String!) {
+        query GenerateCheckoutSession($apiKey: String!, $orderId: Int!, $userId: Int!) {
           generateCheckoutSession(apiKey: $apiKey, orderId: $orderId, userId: $userId) {
             chainIds
             chains {
-              _id
               address
-              chainType
-              createdAt
-              imageUrl
               name
-              symbol
-              updatedAt
             }
             checkoutId
             price
@@ -155,6 +151,7 @@
         })
       }).then(response => response.json())
       .then(data => {
+          console.log(data.data.generateCheckoutSession);
         window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
         $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })
