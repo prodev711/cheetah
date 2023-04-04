@@ -121,6 +121,7 @@
       var Method = <?php echo $method ;?>;
       var apiKey = '<?php echo $apiKey;?>';
       var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
+      console.log(checkoutSession);
       var Amount = checkoutSession.price ;
       const url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=eur";
       fetch(url)
@@ -133,7 +134,8 @@
         })
         .catch(error => console.error(error));
     </script>
-    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
     <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
+    
   </body>
 </html>

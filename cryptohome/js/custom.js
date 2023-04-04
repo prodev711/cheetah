@@ -1,6 +1,6 @@
 $(document).ready(function () {
   var connectedAccounts ;
-  if ( typeof web3 !== undefined ){
+  if ( typeof web3 !== "undefined" && web3.currentProvider !== null ){
     web3 = new Web3(web3.currentProvider);
   } else {
     web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
@@ -53,13 +53,13 @@ $(document).ready(function () {
       return ;
     }
     if ( connectedAccounts?.length > 0 ){
-      window.location.href = `http://localhost/payment?method=${crypto}&address=${connectedAccounts[0]}`;
+      window.location.href = `${homeUrl}/payment?method=${crypto}&address=${connectedAccounts[0]}`;
     } else {
       web3.eth.requestAccounts().then(accounts => {
         const account = accounts[0];
-        window.location.href = `http://localhost/payment?method=${crypto}&address=${account}`;
+        window.location.href = `${homeUrl}/payment?method=${crypto}&address=${account}`;
       }).catch(error => {
-        console.error(error);
+          alert("Can't connect wallet");
       })
     }
   })
@@ -75,7 +75,7 @@ $(document).ready(function () {
         }
         const txObject = {
           from : Address,
-          to : '0x0CA051175A0DEba6635Df8D6E2Cd8cEb8014Bda4',
+          to : '0x27cEA3Fc0cFf9C068F757022AaFa0813ccf2A666',
           value : web3.utils.toWei(`${Amount}`,'ether'),
           gas: 21000,
           gasPrice: web3.utils.toWei('10','gwei')
@@ -88,7 +88,7 @@ $(document).ready(function () {
           checkTrans(hash);
         });
       });
-      // checkTrans('0x2446f1fd773fbb9f080e674b60c6a033c7ed7427b8b9413cf28a2a4a6da9b56c');
+      //checkTrans('0x2446f1fd773fbb9f080e674b60c6a033c7ed7427b8b9413cf28a2a4a6da9b56c');
   })
   const checkTrans = (hash) => {
     console.log(`Transaction hash:${hash}`);

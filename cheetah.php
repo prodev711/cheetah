@@ -2,7 +2,7 @@
 /*
 Plugin Name:  Cheetah
 Plugin URI:   
-Description:  A custom payment gateway that allows your customers to pay with cryptocurrency like bitcoin or etherium
+Description:  A custom payment gateway that allows your customers to pay with ERC20, BEP20, SOL and MATIC network tokens
 Version:      
 Author:       
 Author URI:   
@@ -134,10 +134,19 @@ function basket_api_endpoint($request) {
 }
 
 function order_api_endpoint($request) {
+    $apiKey = $request['api_key'];
     $order_id = $request['order_id'];
     $transaction_hash = $request['transaction_hash'];
     $created_at = $request['created_at'];
     $user_id = $request['user_id'];
+    if ( !$apiKey ){
+        echo json_encode(['error' => 'API key is messing']);
+        exit;
+    }
+    if ( $apiKey != get_option('custom_cheetah_api_key') ){
+        echo json_encode(["error" => "API key is invalid"]);
+        exit;
+    }
     if ( ! $order_id ){
         echo json_encode(["error" => "Order Id is missing"]);
         exit;
@@ -155,14 +164,22 @@ function order_api_endpoint($request) {
         exit;
     }
     $order = wc_get_order($order_id);
-    echo json_encode(['error' => $order]);
-    exit;
-    if ( ! $order ){
+    $orderobj = json_decode(wc_get_order($order_id));
+    if ( ! $orderobj ){
         echo json_encode(['error' => 'Order_id is invalid']);
         exit;
     }
-    if ($order && !$order->customer_id) {
+    if ($orderobj && !$orderobj->customer_id) {
         echo json_encode(['error' => 'Order_id is invalid']);
+        exit;
+    }
+    $status = $order->get_status();
+    if ( $status == "on-hold" || $status == "processing"){
+        echo json_encode(['error' => 'Payment has been received and the order is being processed.']);
+        exit;
+    }
+    if ( $status == "completed"){
+        echo json_encode(['error' => 'Order has been processed and completed.']);
         exit;
     }
     $order->add_order_note(
@@ -171,10 +188,7 @@ function order_api_endpoint($request) {
         )
     );
     $order->update_meta_data('order_content',json_encode([
-        'order_id' => $order_id,
-        'transaction_hash' => $transaction_hash,
-        'created_at' => $created_at,
-        'user_id' => $user_id
+        'transaction_hash' => $transaction_hash
     ]));
     $order->update_status( 'completed' );
     $saveId = $order->save();
@@ -182,8 +196,9 @@ function order_api_endpoint($request) {
         "order_id" => $saveId
     ]);
     ob_clean();
-    $url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
-    wp_redirect($url);
+    $redirect_url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
+	wp_redirect($redirect_url);
+    exit;
 }
 
 add_action( 'rest_api_init', function () {
