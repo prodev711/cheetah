@@ -3,10 +3,8 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   date_default_timezone_set('America/New_York');
   $orderId = WC()->session->get('order_id');
-  $order = WC()->session->get('order_product');
-//   $user_id = WC()->session->get('customer_id');
-//   var_dump($user_id);
-//   exit;
+  // $order = WC()->session->get('order_product');
+  $shop_name = get_bloginfo( 'name' );
   if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
     exit;
@@ -54,7 +52,7 @@
           </a>
           <div class="content-block-heading-left-part">
             <h4>Envoyer un paiement à</h4>
-            <h2>Zalando</h2>
+            <h2><?php echo $shop_name ;?></h2>
           </div>
           <span class="remaining-time text-white rounded-pill d-none d-lg-flex"
             ><?php echo date('m.d');?></span>

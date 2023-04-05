@@ -3,6 +3,7 @@
   $method = $_GET['method'] ;
   $address = $_GET['address'];
   $product = json_decode(WC()->session->get('order_product'));
+  $shop_name = get_bloginfo( 'name' );
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
 ?>
@@ -45,7 +46,7 @@
           </a>
           <div class="content-block-heading-left-part">
             <h4>Envoyer un paiement à</h4>
-            <h2>Zalando</h2>
+            <h2><?php echo $shop_name ;?></h2>
           </div>
           <span class="remaining-time text-white rounded-pill d-none d-lg-flex"
             ><?php echo date('m.d');?></span
