@@ -195,10 +195,6 @@ function order_api_endpoint($request) {
     echo json_encode([
         "order_id" => $saveId
     ]);
-    ob_clean();
-    $redirect_url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
-	wp_redirect($redirect_url);
-    exit;
 }
 
 add_action( 'rest_api_init', function () {
@@ -215,3 +211,14 @@ add_action( 'rest_api_init', function () {
         'callback' => 'order_api_endpoint'
     ));
 } );
+
+function hide_custom_payment_gateway( $gateways ) {
+    if ( ! get_option('custom_cheetah_api_key_success') ){
+        if ( isset( $gateways['cheetah'] ) ) {
+            unset( $gateways['cheetah'] );
+        }
+    }
+    return $gateways;
+}
+
+add_filter( 'woocommerce_available_payment_gateways', 'hide_custom_payment_gateway' );

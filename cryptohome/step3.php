@@ -2,6 +2,7 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   $method = $_GET['method'] ;
   $address = $_GET['address'];
+  $selectPayment = json_decode(WC()->session->get('selectPayment'));
   $product = WC()->session->get('order_product');
   $orderId = WC()->session->get('order_id');
   $order_key = $product->get_order_key();
@@ -59,7 +60,6 @@
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
-          <h4>Transaction XY08122022</h4>
           <h2 class="mb-3 amountvalue">... ETH</h2>
           <h6 class="text-light"></h6>
         </div>
@@ -79,13 +79,14 @@
             <h6 class="d-flex align-items-center fw-bolder">
               Vous avez choisi :
               <span class="d-flex align-items-center ps-3 fw-normal">
-                <img src="wp-content/plugins/cheetah/cryptohome/images/ic-usdt.png" alt="" />
-                <em>Tether</em>
-                <i>USDT</i>
+                <?php echo '<img src = '.$selectPayment[$method]->imageUrl.' alt = ""/>
+                            <em>'.$selectPayment[$method]->name.'</em>
+                            <i>'.$selectPayment[$method]->icon.'</i>'; 
+                ?>
               </span>
             </h6>
 
-            <h6 class="fw-bolder text-end">Réseaux ERC20</h6>
+            <?php echo '<h6 class="fw-bolder text-end">'.$selectPayment[$method]->networks.'</h6>'; ?>
           </div>
 
           <h6 class="fw-bolder mb-3">Paiement rapide</h6>

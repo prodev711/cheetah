@@ -11,6 +11,23 @@
   $homeUrl = home_url();
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
+  $selectPayment = [
+    [
+      "_id" => 0,
+      "name" => "Bitcoin",
+      "icon" => "BTC",
+      "imageUrl" => "wp-content/plugins/cheetah/cryptohome/images/ic-btc.png",
+      "networks" => "Réseaux BTC"
+    ],
+    [
+      "_id" => 1,
+      "name" => "Ethereum",
+      "icon" => "ETH",
+      "imageUrl" => "wp-content/plugins/cheetah/cryptohome/images/ic-eth.png",
+      "networks" => "Réseaux ERC20"
+    ]
+  ];
+  WC()->session->set('selectPayment',json_encode($selectPayment));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,7 +75,6 @@
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
-          <h4>Transaction XY08122022</h4>
           <h2 class="mb-3 amountvalue">... €</h2>
           <h6 class="text-light"></h6>
         </div>
@@ -75,26 +91,18 @@
           </h6>
           <div class="transaction-detail-block-content mb-4">
             <ul class="radio-list">
-              <li>
-                <label>
-                  <input type="radio" name="radio-list" value = '1' />
-                  <span>
-                    <img src="wp-content/plugins/cheetah/cryptohome/images/ic-btc.png" alt="" />
-                    <em>Bitcoin</em>
-                    <i>BTC</i>
-                  </span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="radio-list" value='2'/>
-                  <span>
-                    <img src="wp-content/plugins/cheetah/cryptohome/images/ic-eth.png" alt="" />
-                    <em>Ethereum</em>
-                    <i>ETH</i>
-                  </span>
-                </label>
-              </li>
+              <?php
+                for ( $i = 0 ; $i < count($selectPayment); $i ++ ){
+                  echo "<li><label>";
+                    echo '<input type="radio" name="radio-list" value="'.$selectPayment[$i]['_id'].'" />';
+                    echo '<span>';
+                      echo '<img src = "'.$selectPayment[$i]['imageUrl'].'" alt = "" />';
+                      echo '<em>'.$selectPayment[$i]['name'].'</em>';
+                      echo '<i>'.$selectPayment[$i]['icon'].'</i>';
+                    echo '</span>';
+                  echo '</label></li>';
+                }
+              ?>
             </ul>
           </div>
 
@@ -125,11 +133,17 @@
           generateCheckoutSession(apiKey: $apiKey, orderId: $orderId) {
             chainIds
             chains {
-              address
+              chainType
+              imageUrl
               name
+              symbol
             }
             checkoutId
             price
+            walletBep20
+            walletErc20
+            walletMatic
+            walletSol
           }
         }
       `;
