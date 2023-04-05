@@ -3,10 +3,8 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   date_default_timezone_set('America/New_York');
   $orderId = WC()->session->get('order_id');
-  $order = WC()->session->get('order_product');
-//   $user_id = WC()->session->get('customer_id');
-//   var_dump($user_id);
-//   exit;
+  // $order = WC()->session->get('order_product');
+  $shop_name = get_bloginfo( 'name' );
   if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
     exit;
@@ -54,26 +52,22 @@
           </a>
           <div class="content-block-heading-left-part">
             <h4>Envoyer un paiement à</h4>
-            <h2>Zalando</h2>
+            <h2><?php echo $shop_name ;?></h2>
           </div>
-          <span class="remaining-time text-white rounded-pill d-none d-lg-flex"
-            ><?php echo date('m.d');?></span>
         </div>
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
           <h4>Transaction XY08122022</h4>
           <h2 class="mb-3 amountvalue">... €</h2>
-          <h6 class="text-light">À régler avant le 30 Septembre 2022</h6>
+          <h6 class="text-light"></h6>
         </div>
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h4 class="fw-bolder">Méthode de paiement</h4>
-            <span class="remaining-time text-white rounded-pill d-lg-none"
-              ><?php echo date('m.d');?></span
-            >
+            
           </div>
 
           <h6 class="mb-4">
