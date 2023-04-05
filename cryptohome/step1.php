@@ -3,7 +3,6 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   date_default_timezone_set('America/New_York');
   $orderId = WC()->session->get('order_id');
-  // $order = WC()->session->get('order_product');
   $shop_name = get_bloginfo( 'name' );
   if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
@@ -26,6 +25,7 @@
     />
     <link rel="shortcut icon" href="wp-content/plugins/cheetah/cryptohome/images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.css"/>
   </head>
 
   <body>
@@ -112,6 +112,7 @@
     <!-- JavaScripts -->
     <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.js"></script>
     <script>
       const apiKey = "<?php echo $apiKey;?>";
       const userId = <?php echo $userId ;?>;

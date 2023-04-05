@@ -2,8 +2,11 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   $method = $_GET['method'] ;
   $address = $_GET['address'];
-  $product = json_decode(WC()->session->get('order_product'));
+  $product = WC()->session->get('order_product');
+  $orderId = WC()->session->get('order_id');
+  $order_key = $product->get_order_key();
   $shop_name = get_bloginfo( 'name' );
+  $homeUrl = home_url();
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
 ?>
@@ -20,6 +23,7 @@
     />
     <link rel="shortcut icon" href="wp-content/plugins/cheetah/cryptohome/images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.css"/>
   </head>
 
   <body>
@@ -85,12 +89,26 @@
           </div>
 
           <h6 class="fw-bolder mb-3">Paiement rapide</h6>
-          <a
-            href="#"
-            class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_ether"
-            title=`Payer ${$amount}€ avec Metamask`
-            >Payer ... ETH</a
-          >
+          <div class="proceed_click">
+            <a
+              href="#"
+              class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_ether"
+              title=`Payer ${$amount}€ avec Metamask`
+              >Payer ... ETH</a
+            >
+          </div>
+          <div class="proceed_loading">
+            <a 
+              href='#'
+              class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_loading"
+              style="display:none;"
+            >
+              <div class = "loader-group">
+                <div class="loader"></div>
+                <label class='loader-text' style = "width:150px;"></label>
+              </div>
+            </a>
+          </div>
           <h6 class="mb-3">
             Ou envoyez 154,870000 USDT (en un seul paiement) à l’adresse
             indiquée ci-dessous.
@@ -117,23 +135,26 @@
     <!-- JavaScripts -->
     <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.js"></script>
     <script>
       var totalTime = 300;
+      const homeUrl = "<?php echo $homeUrl;?>";
+      const orderId = <?php echo $orderId; ?>;
       var time,minute;
       var timetrack = setInterval(() => {
-        console.log(totalTime);
         time = parseInt(totalTime/60);
-        console.log(time);
         minute = totalTime % 60;
         $(".remaining-time").html(minute<10?"0" + time + ".0"+minute:"0"+time+"."+minute);
         totalTime -= 1;
         if ( totalTime == 0) {
           clearTimeout(timetrack);
+          window.location.href = `${homeUrl}/checkout/`;
         }
       },1000);
       var Address = '<?php echo $address; ?>';
       var Method = <?php echo $method ;?>;
       var apiKey = '<?php echo $apiKey;?>';
+      var orderKey = '<?php echo $order_key; ?>';
       var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
       console.log(checkoutSession);
       var Amount = checkoutSession.price ;
