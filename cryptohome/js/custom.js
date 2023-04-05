@@ -97,7 +97,7 @@ $(document).ready(function () {
         }
         const txObject = {
           from : Address,
-          to : '0x27cEA3Fc0cFf9C068F757022AaFa0813ccf2A666',
+          to : checkoutSession[convertTokens[checkoutSession.chains[Method]['symbol']]],
           value : web3.utils.toWei(`${Amount}`,'ether'),
           gas: 21000,
           gasPrice: web3.utils.toWei('10','gwei')

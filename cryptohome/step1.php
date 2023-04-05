@@ -11,23 +11,6 @@
   $homeUrl = home_url();
   $userId = get_current_user_id();
   $apiKey = get_option('custom_cheetah_api_key');
-  $selectPayment = [
-    [
-      "_id" => 0,
-      "name" => "Bitcoin",
-      "icon" => "BTC",
-      "imageUrl" => "wp-content/plugins/cheetah/cryptohome/images/ic-btc.png",
-      "networks" => "Réseaux BTC"
-    ],
-    [
-      "_id" => 1,
-      "name" => "Ethereum",
-      "icon" => "ETH",
-      "imageUrl" => "wp-content/plugins/cheetah/cryptohome/images/ic-eth.png",
-      "networks" => "Réseaux ERC20"
-    ]
-  ];
-  WC()->session->set('selectPayment',json_encode($selectPayment));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -85,24 +68,9 @@
             <h4 class="fw-bolder">Méthode de paiement</h4>
             
           </div>
-
-          <h6 class="mb-4">
-            Sélectionnez une cryptomonnaie pour effectuer votre paiement.
-          </h6>
           <div class="transaction-detail-block-content mb-4">
-            <ul class="radio-list">
-              <?php
-                for ( $i = 0 ; $i < count($selectPayment); $i ++ ){
-                  echo "<li><label>";
-                    echo '<input type="radio" name="radio-list" value="'.$selectPayment[$i]['_id'].'" />';
-                    echo '<span>';
-                      echo '<img src = "'.$selectPayment[$i]['imageUrl'].'" alt = "" />';
-                      echo '<em>'.$selectPayment[$i]['name'].'</em>';
-                      echo '<i>'.$selectPayment[$i]['icon'].'</i>';
-                    echo '</span>';
-                  echo '</label></li>';
-                }
-              ?>
+            <ul class="radio-list select-coin-lists">
+              
             </ul>
           </div>
 
@@ -163,9 +131,22 @@
         })
       }).then(response => response.json())
       .then(data => {
-          console.log(data);
-        window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
-        $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
+          const chainsArray = data.data.generateCheckoutSession.chains;
+          console.log(chainsArray);
+            var htmlStr = "";
+            for ( var i = 0 ; i < chainsArray.length ; i ++ ){
+                htmlStr += `<li><label>`;
+                htmlStr += `<input type='radio' name='radio-list' value='${i}' />`;
+                htmlStr += `<span>`;
+                htmlStr += `<img src = '${chainsArray[i]['imageUrl']}' alt = '' />`;
+                htmlStr += `<em>${chainsArray[i]['name']}</em>`;
+                htmlStr += `<i>${chainsArray[i]['symbol']}</i>`;
+                htmlStr += `</span>`;
+                htmlStr += `</label></li>`;
+            }
+            $(".select-coin-lists").html(htmlStr);
+            window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
+            $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
       })
       .catch(err => console.log(err));
     </script>
