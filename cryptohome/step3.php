@@ -59,7 +59,6 @@
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
-          <h4>Transaction XY08122022</h4>
           <h2 class="mb-3 amountvalue">... ETH</h2>
           <h6 class="text-light"></h6>
         </div>
@@ -78,14 +77,11 @@
           >
             <h6 class="d-flex align-items-center fw-bolder">
               Vous avez choisi :
-              <span class="d-flex align-items-center ps-3 fw-normal">
-                <img src="wp-content/plugins/cheetah/cryptohome/images/ic-usdt.png" alt="" />
-                <em>Tether</em>
-                <i>USDT</i>
+              <span class="d-flex align-items-center ps-3 fw-normal selected-coin-info">
               </span>
             </h6>
 
-            <h6 class="fw-bolder text-end">Réseaux ERC20</h6>
+            <h6 class="fw-bolder text-end">ERC20</h6>
           </div>
 
           <h6 class="fw-bolder mb-3">Paiement rapide</h6>
@@ -118,7 +114,7 @@
             <div class="col">
               <input
                 type="text"
-                class="form-control rounded-pill"
+                class="form-control rounded-pill to-wallet-address"
                 value="TQodgX8gBBzubAexj5zYCvGtg"
                 disabled
               />
@@ -137,6 +133,12 @@
     <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.js"></script>
     <script>
+        const convertTokens = {
+            'ETH' : 'walletErc20',
+            'MATIC' : 'walletMatic',
+            "BNB" : "walletBep20",
+            "SOL" : "walletSol"
+        };
       var totalTime = 300;
       const homeUrl = "<?php echo $homeUrl;?>";
       const orderId = <?php echo $orderId; ?>;
@@ -157,6 +159,12 @@
       var orderKey = '<?php echo $order_key; ?>';
       var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
       console.log(checkoutSession);
+      var htmlStr = "";
+      htmlStr += `<img src = "${checkoutSession.chains[Method]['imageUrl']}" alt = ""/>`;
+      htmlStr += `<em>${checkoutSession.chains[Method]['name']}</em>`;
+      htmlStr += `<i>${checkoutSession.chains[Method]['symbol']}</i>`;
+      $(".selected-coin-info").html(htmlStr);
+      $(".to-wallet-address").val(checkoutSession[convertTokens[checkoutSession.chains[Method]['symbol']]]);
       var Amount = checkoutSession.price ;
       const url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=eur";
       fetch(url)
