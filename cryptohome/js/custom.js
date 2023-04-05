@@ -1,5 +1,6 @@
 $(document).ready(function () {
   var connectedAccounts ;
+  var states = "start";
   if ( typeof web3 !== "undefined" && web3.currentProvider !== null ){
     web3 = new Web3(web3.currentProvider);
   } else {
@@ -49,7 +50,7 @@ $(document).ready(function () {
   $(".choosePayment").on("click",function() {
     var crypto = $('input[name="radio-list"]:checked').val();
     if ( crypto == undefined ) {
-      alert("please choose payment");
+      toastr.error("please choose payment");
       return ;
     }
     if ( connectedAccounts?.length > 0 ){
@@ -59,18 +60,39 @@ $(document).ready(function () {
         const account = accounts[0];
         window.location.href = `${homeUrl}/payment?method=${crypto}&address=${account}`;
       }).catch(error => {
-          alert("Can't connect wallet");
+        toastr.error("Can't connect wallet");
       })
     }
   })
+  var startProcessing = () => {
+    states = "process";
+    $(".loader-text").html("on process ...");
+    $(".proceed_click").css('display','none');
+    $(".proceed_loading").css('display','block');
+  }
+  var stopProcessing = () => {
+    states = "start";
+    $(".proceed_click").css('display','block');
+    $(".proceed_loading").css('display','none');
+  }
   $(".proceed_pay_ether").on("click",function() {
+    console.log(states);
+      if ( states == "process" ){
+        toastr.warning("Currently in progress.");
+        return ;
+      }
+      if ( states != "process" ){
+        startProcessing();
+      }
       web3.eth.getBalance(Address,(err,balances) => {
         if ( err ){
-          console.error(err);
+          toastr.error("Proccess error, please try again");
+          stopProcessing();
           return ;
         }
         if ( balances < Amount ) {
-          alert("Sorry! Your account has not enough to buy");
+          toastr.warning("Sorry. Your account has not enough to pay");
+          stopProcessing();
           return;
         }
         const txObject = {
@@ -79,17 +101,18 @@ $(document).ready(function () {
           value : web3.utils.toWei(`${Amount}`,'ether'),
           gas: 21000,
           gasPrice: web3.utils.toWei('10','gwei')
-        }
+        };
         web3.eth.sendTransaction(txObject, (error,hash) => {
           if ( error ){
-            console.error(error);
+            toastr.error("Proccess error, please try again");
+            stopProcessing();
             return ;
           }
+          $(".loader-text").html(hash);
           checkTrans(hash);
         });
       });
-      //checkTrans('0x2446f1fd773fbb9f080e674b60c6a033c7ed7427b8b9413cf28a2a4a6da9b56c');
-  })
+  });
   const checkTrans = (hash) => {
     console.log(`Transaction hash:${hash}`);
     const query = `
@@ -120,7 +143,8 @@ $(document).ready(function () {
         console.log("Transaction is pending...");
         web3.eth.getTransactionReceipt(hash).then(receipt => {
           if ( receipt && receipt.status) {
-            console.log('Transaction successed !');
+            toastr.success("Payment successed !");
+            stopProcessing();
             const query1 = `
               mutation ValidateTransaction ($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
                 validateTransaction(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
@@ -142,12 +166,24 @@ $(document).ready(function () {
                 },
                 operationName : "ValidateTransaction"
               })
-            }).then(response => response.json())
-            .then(data => console.log(data))
-            .catch(err => console.error(err));
+            }).then(
+              response => response.json()
+            ).then(
+              data => {
+                console.log(data);
+                const redirect_url = homeUrl + "/checkout/order-received/" + orderId + "/?key="+ orderKey;
+                setTimeout(() => {
+                  window.location.href = redirect_url;
+                },1000);
+              }
+            )
+            .catch(
+              err => console.error(err)
+            );
             clearInterval(checkTransaction);
           } else {
-            console.log('Transaction failed');
+            toastr.error("Payment error !");
+            stopProcessing();
             const query1 = `
               mutation TransactionFailed ($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
                 transactionFailed(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
@@ -177,40 +213,15 @@ $(document).ready(function () {
             .catch(err => console.error(err));
           }
         }).catch(error => {
-          console.error(error);
+          toastr.error('Transaction error');
+          stopProcessing();
           clearInterval(checkTransaction);
         })
       },5000)
     })
-    .catch(err => console.error(err));
-    /**************************         Must Delete           ******************************* */
-    // console.log(apiKey);
-    // console.log(checkoutSession.chainIds[0]);
-    // console.log(checkoutSession.checkoutId);
-    // console.log(hash);
-    const query1 = `
-            mutation ValidateTransaction ($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
-              validateTransaction(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
-            }
-    `;
-    fetch("https://cheetah-backend.herokuapp.com/graphql",{
-      method : "POST",
-      headers : {
-        'Content-Type' : "application/json",
-        "Accept" : "application/json"
-      },
-      body: JSON.stringify({
-        query:query1,
-        variables : {
-          apiKey : apiKey,
-          chainId : checkoutSession.chainIds[0],
-          checkoutSessionId : checkoutSession.checkoutId,
-          transactionHash : hash
-        },
-        operationName : "ValidateTransaction"
-      })
-    }).then(response => response.json())
-    .then(data => console.log(data))
-    .catch(err => console.error(err));
-  }
+    .catch(err => {
+      stopProcessing();
+      toastr.error('Transaction error');
+    });
+  };
 });
