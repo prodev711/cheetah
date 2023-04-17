@@ -98,6 +98,7 @@
       var cap_currency = '<?php echo $currency ?>';
       console.log(orderId);
       var checkoutId = "";
+      var chainsArray = [];
       const query = `
         query GenerateCheckoutSession($apiKey: String!, $orderId: Int!) {
           generateCheckoutSession(apiKey: $apiKey, orderId: $orderId) {
@@ -133,7 +134,8 @@
         })
       }).then(response => response.json())
       .then(data => {
-          const chainsArray = data.data.generateCheckoutSession.chains;
+          chainsArray = data.data.generateCheckoutSession.chains;
+          console.log(chainsArray);
             var htmlStr = "";
             for ( var i = 0 ; i < chainsArray.length ; i ++ ){
                 htmlStr += `<li><label>`;
@@ -151,7 +153,7 @@
       })
       .catch(err => console.log(err));
     </script>
-    <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
+    <script src="wp-content/plugins/cheetah/web3.js/web3.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
   </body>
 </html>

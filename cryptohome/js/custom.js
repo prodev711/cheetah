@@ -13,12 +13,10 @@ $(document).ready(function () {
       console.log(BlockNumber);
     }
   })
-  //Prevent Page Reload on all # links
   $("body").on("click", "a[href='#']", function (e) {
     e.preventDefault();
   });
 
-  //placeholder
   $("[placeholder]").each(function () {
     $(this).attr("data-placeholder", this.placeholder);
     $(this).bind("focus", function () {
@@ -28,7 +26,16 @@ $(document).ready(function () {
       this.placeholder = $(this).attr("data-placeholder");
     });
   });
-
+    $(".save-clipboard").on("click",function(){
+        var textArea = document.createElement("textarea");
+        textArea.value = $(".to-wallet-address").val();
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        toastr.success("Adress copied");
+        // Remove the textarea element from the DOM
+        document.body.removeChild(textArea);
+    })
   // Add remove class when window resize finished
   var $resizeTimer;
   $(window).on("resize", function (e) {
@@ -89,15 +96,17 @@ $(document).ready(function () {
           stopProcessing();
           return ;
         }
-        if ( balances < Amount ) {
+        if ( balances < amountInToken ) {
           toastr.warning("Sorry. Your account has not enough to pay");
           stopProcessing();
           return;
         }
+        const roundedAmount = Number.parseFloat(amountInToken).toFixed(18);
+        const valueInWei = web3.utils.toWei(roundedAmount, 'ether');
         const txObject = {
           from : Address,
           to : checkoutSession[convertTokens[checkoutSession.chains[Method]['symbol']]],
-          value : web3.utils.toWei(`${Amount}`,'ether'),
+          value : valueInWei,
           gas: 21000,
           gasPrice: web3.utils.toWei('10','gwei')
         };
@@ -141,6 +150,7 @@ $(document).ready(function () {
       var checkTransaction = setInterval(() => {
         console.log("Transaction is pending...");
         web3.eth.getTransactionReceipt(hash).then(receipt => {
+            console.log(receipt);
           if ( receipt && receipt.status) {
             toastr.success("Payment successed !");
             stopProcessing();
@@ -180,10 +190,11 @@ $(document).ready(function () {
               err => console.error(err)
             );
             clearInterval(checkTransaction);
-          } else {
-            toastr.error("Payment error !");
-            stopProcessing();
-            const query1 = `
+          }
+        }).catch(error => {
+          toastr.error('Transaction error');
+          stopProcessing();
+          const query1 = `
               mutation TransactionFailed ($amountInToken: Float!, $apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
                 transactionFailed(amountInToken: $amountInToken, apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
               }
@@ -210,11 +221,6 @@ $(document).ready(function () {
               clearInterval(checkTransaction);
             })
             .catch(err => console.error(err));
-          }
-        }).catch(error => {
-          toastr.error('Transaction error');
-          stopProcessing();
-          clearInterval(checkTransaction);
         })
       },5000)
     })

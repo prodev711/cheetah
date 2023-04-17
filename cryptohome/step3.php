@@ -122,7 +122,7 @@
               />
             </div>
             <div class="col-auto ps-0">
-              <button class="btn btn-primary rounded-pill">Copier</button>
+              <button class="btn btn-primary rounded-pill save-clipboard">Copier</button>
             </div>
           </div>
         </div>
@@ -134,6 +134,7 @@
     <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
     <script src="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.js"></script>
+    <script src="wp-content/plugins/cheetah/web3.js/web3.min.js"></script>
     <script>
         const convertTokens = {
             'ETH' : 'walletErc20',
@@ -142,28 +143,28 @@
             "XRP" : "walletSol",
             "USDT" : "walletErc20"
         };
-      var totalTime = 300;
-      const homeUrl = "<?php echo $homeUrl;?>";
-      const orderId = <?php echo $orderId; ?>;
-      var time,minute;
-      var timetrack = setInterval(() => {
-        time = parseInt(totalTime/60);
-        minute = totalTime % 60;
-        $(".remaining-time").html(minute<10?"0" + time + ".0"+minute:"0"+time+"."+minute);
-        totalTime -= 1;
-        if ( totalTime == 0) {
-          clearTimeout(timetrack);
-          window.location.href = `${homeUrl}/checkout/`;
-        }
-      },1000);
-      var Address = '<?php echo $address; ?>';
-      var Method = <?php echo $method ;?>;
-      var apiKey = '<?php echo $apiKey;?>';
-      var orderKey = '<?php echo $order_key; ?>';
-      var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
-      var cap_currency = '<?php echo $currency ?>';
-      var amountInToken = 0.0;
-      currency = cap_currency.toLowerCase();
+        var totalTime = 300;
+        const homeUrl = "<?php echo $homeUrl;?>";
+        const orderId = <?php echo $orderId; ?>;
+        var time,minute;
+        var timetrack = setInterval(() => {
+            time = parseInt(totalTime/60);
+            minute = totalTime % 60;
+            $(".remaining-time").html(minute<10?"0" + time + ".0"+minute:"0"+time+"."+minute);
+            totalTime -= 1;
+            if ( totalTime == 0) {
+              clearTimeout(timetrack);
+              window.location.href = `${homeUrl}/checkout/`;
+            }
+        },1000);
+        var Address = '<?php echo $address; ?>';
+        var Method = <?php echo $method ;?>;
+        var apiKey = '<?php echo $apiKey;?>';
+        var orderKey = '<?php echo $order_key; ?>';
+        var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
+        var cap_currency = '<?php echo $currency ?>';
+        var amountInToken = 0.0;
+        currency = cap_currency.toLowerCase();
         const query = `
           query {
             orderAmountInToken(
