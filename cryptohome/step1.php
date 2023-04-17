@@ -3,6 +3,8 @@
   require_once (__DIR__.'/../../../../wp-load.php');
   date_default_timezone_set('America/New_York');
   $orderId = WC()->session->get('order_id');
+  $product = wc_get_order($orderId);
+  $currency = $product->currency ;
   $shop_name = get_bloginfo( 'name' );
   if ( $orderId == NULL ) {
     echo '<h1>There is no order</h1>';
@@ -58,8 +60,8 @@
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
-          <h2 class="mb-3 amountvalue">... €</h2>
-          <h6 class="text-light"></h6>
+            <h2 class="mb-3 amountvalue"></h2>
+            <h6 class="text-light"></h6>
         </div>
 
         <!-- Content Transaction Detail -->
@@ -77,7 +79,6 @@
           <div
             class="btn-outer d-flex align-items-center justify-content-between"
           >
-            <a href="#" title="Voir plus" class="read-more-link">Voir plus</a>
             <button class="btn btn-primary rounded-pill choosePayment">Suivant</button>
           </div>
         </div>
@@ -94,6 +95,7 @@
       const userId = <?php echo $userId ;?>;
       const homeUrl = "<?php echo $homeUrl;?>";
       const orderId = <?php echo $orderId;?> ;
+      var cap_currency = '<?php echo $currency ?>';
       console.log(orderId);
       var checkoutId = "";
       const query = `
@@ -132,7 +134,6 @@
       }).then(response => response.json())
       .then(data => {
           const chainsArray = data.data.generateCheckoutSession.chains;
-          console.log(chainsArray);
             var htmlStr = "";
             for ( var i = 0 ; i < chainsArray.length ; i ++ ){
                 htmlStr += `<li><label>`;
@@ -146,7 +147,7 @@
             }
             $(".select-coin-lists").html(htmlStr);
             window.localStorage.setItem("checkoutSession",JSON.stringify(data.data.generateCheckoutSession))
-            $(".amountvalue").html(data.data.generateCheckoutSession.price + " €");
+            $(".amountvalue").html(data.data.generateCheckoutSession.price + " "+cap_currency);
       })
       .catch(err => console.log(err));
     </script>
