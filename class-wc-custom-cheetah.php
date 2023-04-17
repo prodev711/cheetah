@@ -22,7 +22,7 @@ if ( !defined('ABSPATH')){
 class WC_Custom_Cheetah extends WC_Payment_Gateway {
     /** @var bool Whether or not logging is enabled */
 	public static $log_enabled = false;
-
+    public $api_key = "";
     /** @var WC_Logger Logger instance */
 	public static $log = false;
 	/**
@@ -56,6 +56,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
 
     public function woocommerce_validate_api_key() {
         $api_key = isset($_POST['woocommerce_cheetah_api_key']) ? $_POST['woocommerce_cheetah_api_key'] : '';
+        $this->api_key = $api_key;
         // update_option('custom_cheetah_api_key', $api_key);
         $result = $this->validate_api_key($api_key);
         if ( !$result['result'] ){
@@ -93,7 +94,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
         }
         if ( get_option( 'custom_cheetah_api_key_error' ) ) {
             $html .= "<tr valign='top'><div class='notice notice-error'>
-                <p> Invalid API key. Please enter a valid key.</p>
+                <p> your account is not valid. It's not possible to use this payment method until your update your account</p>
             </div></tr>";
         } else if ( get_option('custom_cheetah_api_key_success')){
             $html .= "<tr valign ='top'><div class='notice notice-success'>
@@ -170,6 +171,9 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
             return $result;
         }
     }
+    public function get_api_key() {
+        return $this->api_key;
+    }
 
     /**
 	 * Process the payment and return the result.
@@ -182,7 +186,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
 		// $order->payment_complete();
 	
 		// Redirect to custom HTML page
-		$redirect_url = 'http://localhost/cheetah';
+		$redirect_url = home_url().'/cheetah';
 		WC()->session->delete_session('order_id');
 		WC()->session->set('order_id',$order_id);
 		WC()->session->set('order_product',$order);

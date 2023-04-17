@@ -1,3 +1,16 @@
+<?php
+  require_once (__DIR__.'/../../../../wp-load.php');
+  $method = $_GET['method'] ;
+  $address = $_GET['address'];
+  $product = WC()->session->get('order_product');
+  $currency = $product->currency ;
+  $orderId = WC()->session->get('order_id');
+  $order_key = $product->get_order_key();
+  $shop_name = get_bloginfo( 'name' );
+  $homeUrl = home_url();
+  $userId = get_current_user_id();
+  $apiKey = get_option('custom_cheetah_api_key');
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,8 +22,9 @@
       name="description"
       content="Meta descriptions may be included in search results to concisely summarize page content."
     />
-    <link rel="shortcut icon" href="images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="shortcut icon" href="wp-content/plugins/cheetah/cryptohome/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.css"/>
   </head>
 
   <body>
@@ -19,10 +33,10 @@
       <div class="col-lg-6 bg-primary left-block d-none d-lg-block">
         <div class="left-block-heading">
           <a href="#" title="Cheeta" class="logo">
-            <img src="images/logo.svg" alt="Cheeta" />
+            <img src="wp-content/plugins/cheetah/cryptohome/images/logo.svg" alt="Cheeta" />
           </a>
         </div>
-        <img src="images/logo-symbol.svg" alt="" class="bg-img" />
+        <img src="wp-content/plugins/cheetah/cryptohome/images/logo-symbol.svg" alt="" class="bg-img" />
       </div>
       <!-- End Left Block -->
 
@@ -33,22 +47,22 @@
           class="content-block-heading d-lg-flex justify-content-between align-items-center mb-4 text-center text-lg-start"
         >
           <a href="#" title="Cheeta" class="logo d-lg-none d-inline-block mb-5">
-            <img src="images/logo-dark.svg" alt="Cheeta" />
+            <img src="wp-content/plugins/cheetah/cryptohome/images/logo-dark.svg" alt="Cheeta" />
           </a>
           <div class="content-block-heading-left-part">
             <h4>Envoyer un paiement à</h4>
-            <h2>Zalando</h2>
+            <h2><?php echo $shop_name ;?></h2>
           </div>
           <span class="remaining-time text-white rounded-pill d-none d-lg-flex"
-            >44:32</span
+            >05.00</span
           >
         </div>
 
         <!-- Content Transaction Detail -->
         <div class="transaction-detail-block card-block p-3 p-lg-4 p-xl-5 mb-4">
-          <h4>Transaction XY08122022</h4>
-          <h2 class="mb-3">149,90€</h2>
-          <h6 class="text-light">À régler avant le 30 Septembre 2022</h6>
+            <h4 class='transaction_info'>Transaction ...</h4>
+            <h2 class="mb-3 amountvalue"></h2>
+            <h6 class="text-light"></h6>
         </div>
 
         <!-- Content Transaction Detail -->
@@ -56,7 +70,7 @@
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h4 class="fw-bolder">Méthode de paiement</h4>
             <span class="remaining-time text-white rounded-pill d-lg-none"
-              >44:32</span
+              >05.00</span
             >
           </div>
 
@@ -65,25 +79,36 @@
           >
             <h6 class="d-flex align-items-center fw-bolder">
               Vous avez choisi :
-              <span class="d-flex align-items-center ps-3 fw-normal">
-                <img src="images/ic-usdt.png" alt="" />
-                <em>Tether</em>
-                <i>USDT</i>
+              <span class="d-flex align-items-center ps-3 fw-normal selected-coin-info">
               </span>
             </h6>
 
-            <h6 class="fw-bolder text-end">Réseaux ERC20</h6>
+            <h6 class="fw-bolder text-end chainType"></h6>
           </div>
 
           <h6 class="fw-bolder mb-3">Paiement rapide</h6>
-          <a
-            href="#"
-            class="btn btn-primary rounded-pill d-block mb-5 btn-lg"
-            title="Payer 149,90€ avec Metamask"
-            >Payer 149,90€ avec Metamask</a
-          >
-          <h6 class="mb-3">
-            Ou envoyez 154,870000 USDT (en un seul paiement) à l’adresse
+          <div class="proceed_click">
+            <a
+              href="#"
+              class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_ether"
+              title=`Payer ${$amount}€ avec Metamask`
+              >Payer</a
+            >
+          </div>
+          <div class="proceed_loading">
+            <a 
+              href='#'
+              class="btn btn-primary rounded-pill d-block mb-5 btn-lg proceed_pay_loading"
+              style="display:none;"
+            >
+              <div class = "loader-group">
+                <div class="loader"></div>
+                <label class='loader-text' style = "width:150px;"></label>
+              </div>
+            </a>
+          </div>
+          <h6 class="mb-3 show_amount_info">
+            Ou envoyez ... USDT (en un seul paiement) à l’adresse
             indiquée ci-dessous.
           </h6>
 
@@ -91,13 +116,13 @@
             <div class="col">
               <input
                 type="text"
-                class="form-control rounded-pill"
+                class="form-control rounded-pill to-wallet-address"
                 value="TQodgX8gBBzubAexj5zYCvGtg"
                 disabled
               />
             </div>
             <div class="col-auto ps-0">
-              <button class="btn btn-primary rounded-pill">Copier</button>
+              <button class="btn btn-primary rounded-pill save-clipboard">Copier</button>
             </div>
           </div>
         </div>
@@ -106,6 +131,95 @@
     </div>
 
     <!-- JavaScripts -->
-    <script src="js/main.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/jquery-3.6.0.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/bootstrap.bundle.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/plugins/toastr/toastr.min.js"></script>
+    <script src="wp-content/plugins/cheetah/web3.js/web3.min.js"></script>
+    <script>
+        const convertTokens = {
+            'ETH' : 'walletErc20',
+            'MATIC' : 'walletMatic',
+            "BNB" : "walletBep20",
+            "XRP" : "walletSol",
+            "USDT" : "walletErc20"
+        };
+        var totalTime = 300;
+        const homeUrl = "<?php echo $homeUrl;?>";
+        const orderId = <?php echo $orderId; ?>;
+        var time,minute;
+        var timetrack = setInterval(() => {
+            time = parseInt(totalTime/60);
+            minute = totalTime % 60;
+            $(".remaining-time").html(minute<10?"0" + time + ".0"+minute:"0"+time+"."+minute);
+            totalTime -= 1;
+            if ( totalTime == 0) {
+              clearTimeout(timetrack);
+              window.location.href = `${homeUrl}/checkout/`;
+            }
+        },1000);
+        var Address = '<?php echo $address; ?>';
+        var Method = <?php echo $method ;?>;
+        var apiKey = '<?php echo $apiKey;?>';
+        var orderKey = '<?php echo $order_key; ?>';
+        var checkoutSession = JSON.parse(window.localStorage.getItem('checkoutSession'));
+        var cap_currency = '<?php echo $currency ?>';
+        var amountInToken = 0.0;
+        currency = cap_currency.toLowerCase();
+        const query = `
+          query {
+            orderAmountInToken(
+              apiKey: "${apiKey}",
+              chainId: "${checkoutSession.chainIds[Method]}",
+              currency: "${currency}",
+              orderId: ${orderId}
+            )
+          }
+        `;
+        
+        fetch("https://cheetah-backend.herokuapp.com/graphql", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ query })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Handle response data
+          amountInToken = parseFloat(data.data.orderAmountInToken);
+          $(".show_amount_info").html(`Ou envoyez ${data.data.orderAmountInToken} ${checkoutSession.chains[Method]['symbol']} (en un seul paiement) à l’adresse indiquée ci-dessous.` );
+        })
+        .catch(error => {
+          // Handle error
+          console.error(error);
+        });
+
+      $(".transaction_info").html(`Transaction ${checkoutSession.chains[Method]['symbol']} ${orderKey}`);
+      $(".amountvalue").html(checkoutSession.price + " " + cap_currency);
+      $('.proceed_pay_ether').html('Payer ' + checkoutSession.price + " " + cap_currency);
+      
+      
+      var htmlStr = "";
+      htmlStr += `<img src = "${checkoutSession.chains[Method]['imageUrl']}" alt = ""/>`;
+      htmlStr += `<em>${checkoutSession.chains[Method]['name']}</em>`;
+      htmlStr += `<i>${checkoutSession.chains[Method]['symbol']}</i>`;
+      $(".selected-coin-info").html(htmlStr);
+      $(".chainType").html(checkoutSession.chains[Method]['chainType']);
+      $(".to-wallet-address").val(checkoutSession[convertTokens[checkoutSession.chains[Method]['symbol']]]);
+      var Amount = checkoutSession.price ;
+    //   const url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=eur";
+    //   fetch(url)
+    //     .then(response => response.json())
+    //     .then(data => {
+    //       const conversionValue = data.ethereum.eur;
+    //       Amount = Amount / conversionValue;
+          
+    //     })
+    //     .catch(error => console.error(error));
+    </script>
+    <script src="wp-content/plugins/cheetah/web3.js/dist/web3.min.js"></script>
+    <script src="wp-content/plugins/cheetah/cryptohome/js/custom.js"></script>
+    
   </body>
 </html>
