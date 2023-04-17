@@ -76,7 +76,6 @@ $(document).ready(function () {
     $(".proceed_loading").css('display','none');
   }
   $(".proceed_pay_ether").on("click",function() {
-    console.log(states);
       if ( states == "process" ){
         toastr.warning("Currently in progress.");
         return ;
@@ -116,8 +115,8 @@ $(document).ready(function () {
   const checkTrans = (hash) => {
     console.log(`Transaction hash:${hash}`);
     const query = `
-    mutation CreatePendingTransaction($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
-      createPendingTransaction(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
+    mutation CreatePendingTransaction($amountInToken: Float!, $apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
+      createPendingTransaction(amountInToken: $amountInToken, apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
     }
     `;
     fetch("https://cheetah-backend.herokuapp.com/graphql",{
@@ -129,8 +128,9 @@ $(document).ready(function () {
       body: JSON.stringify({
         query:query,
         variables: {
+            amountInToken : amountInToken,
           apiKey: apiKey,
-          chainId: checkoutSession.chainIds[0],
+          chainId: checkoutSession.chainIds[Method],
           checkoutSessionId : checkoutSession.checkoutId,
           transactionHash: hash,
         },
@@ -138,7 +138,6 @@ $(document).ready(function () {
       })
     }).then(response => response.json())
     .then(data => {
-      console.log(data);
       var checkTransaction = setInterval(() => {
         console.log("Transaction is pending...");
         web3.eth.getTransactionReceipt(hash).then(receipt => {
@@ -146,8 +145,8 @@ $(document).ready(function () {
             toastr.success("Payment successed !");
             stopProcessing();
             const query1 = `
-              mutation ValidateTransaction ($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
-                validateTransaction(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
+              mutation ValidateTransaction ($amountInToken: Float!, $apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
+                validateTransaction(amountInToken: $amountInToken, apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
               }
             `;
             fetch("https://cheetah-backend.herokuapp.com/graphql",{
@@ -159,8 +158,9 @@ $(document).ready(function () {
               body: JSON.stringify({
                 query:query1,
                 variables : {
+                    amountInToken : amountInToken,
                   apiKey : apiKey,
-                  chainId : checkoutSession.chainIds[0],
+                  chainId : checkoutSession.chainIds[Method],
                   checkoutSessionId : checkoutSession.checkoutId,
                   transactionHash : hash
                 },
@@ -170,7 +170,6 @@ $(document).ready(function () {
               response => response.json()
             ).then(
               data => {
-                console.log(data);
                 const redirect_url = homeUrl + "/checkout/order-received/" + orderId + "/?key="+ orderKey;
                 setTimeout(() => {
                   window.location.href = redirect_url;
@@ -185,8 +184,8 @@ $(document).ready(function () {
             toastr.error("Payment error !");
             stopProcessing();
             const query1 = `
-              mutation TransactionFailed ($apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
-                transactionFailed(apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
+              mutation TransactionFailed ($amountInToken: Float!, $apiKey: String!, $chainId: String!, $checkoutSessionId: String!, $transactionHash : String!) {
+                transactionFailed(amountInToken: $amountInToken, apiKey: $apiKey, chainId: $chainId, checkoutSessionId: $checkoutSessionId, transactionHash : $transactionHash)
               }
             `;
             fetch("https://cheetah-backend.herokuapp.com/graphql",{
@@ -198,8 +197,9 @@ $(document).ready(function () {
               body: JSON.stringify({
                 query:query1,
                 variables : {
+                    amountInToken : amountInToken,
                   apiKey : apiKey,
-                  chainId : checkoutSession.chainIds[0],
+                  chainId : checkoutSession.chainIds[Method],
                   checkoutSessionId : checkoutSession.checkoutId,
                   transactionHash : hash
                 },
@@ -207,7 +207,6 @@ $(document).ready(function () {
               })
             }).then(response => response.json())
             .then(data => {
-              console.log(data);
               clearInterval(checkTransaction);
             })
             .catch(err => console.error(err));
