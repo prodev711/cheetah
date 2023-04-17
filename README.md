@@ -1,5 +1,5 @@
 # cheetah
-Crypto payment gateway woocommerce plugin with bitcoin, etherium
+A custom payment gateway that allows your customers to pay with ERC20, BEP20, SOL and MATIC network tokens
 
 # photos
 <div align="center">
