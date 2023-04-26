@@ -114,6 +114,7 @@ function user_api_endpoint($request) {
     $email = $data->user_email;
     header( 'Content-Type: application/json' );
     echo json_encode( ['email' => $email] );
+    exit;
 }
 
 function basket_api_endpoint($request) {
@@ -131,6 +132,7 @@ function basket_api_endpoint($request) {
     $amount = floatval($order->total);
     header ('Content-Type: application/json');
     echo json_encode( ['total' => $amount]);
+    exit;
 }
 
 function order_api_endpoint($request) {
@@ -195,9 +197,6 @@ function order_api_endpoint($request) {
     echo json_encode([
         "order_id" => $saveId
     ]);
-    ob_clean();
-    $redirect_url = home_url()."/checkout/order-received/".$order_id."/?key=".$order->get_order_key();
-	wp_redirect($redirect_url);
     exit;
 }
 
@@ -205,13 +204,27 @@ add_action( 'rest_api_init', function () {
     register_rest_route( 'cheetah/v1', '/user', array(
         'methods' => 'GET',
         'callback' => 'user_api_endpoint',
+        'permission_callback' => '__return_true'
     ) );
     register_rest_route( 'cheetah/v1','/orderPrice',array(
         'methods' => 'GET',
-        'callback' => 'basket_api_endpoint'
+        'callback' => 'basket_api_endpoint',
+        'permission_callback' => '__return_true'
     ));
     register_rest_route('cheetah/v1','/order',array(
         'methods' => 'POST',
-        'callback' => 'order_api_endpoint'
+        'callback' => 'order_api_endpoint',
+        'permission_callback' => '__return_true'
     ));
 } );
+
+function hide_custom_payment_gateway( $gateways ) {
+    if ( ! get_option('custom_cheetah_api_key_success') ){
+        if ( isset( $gateways['cheetah'] ) ) {
+            unset( $gateways['cheetah'] );
+        }
+    }
+    return $gateways;
+}
+
+add_filter( 'woocommerce_available_payment_gateways', 'hide_custom_payment_gateway' );
