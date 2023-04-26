@@ -21,13 +21,13 @@ if ( !defined('ABSPATH')){
 
 class WC_Custom_Cheetah extends WC_Payment_Gateway {
     /** @var bool Whether or not logging is enabled */
-	public static $log_enabled = false;
+    public static $log_enabled = false;
     public $api_key = "";
     /** @var WC_Logger Logger instance */
-	public static $log = false;
-	/**
-	 * Constructor for the gateway.
-	 */
+    public static $log = false;
+    /**
+     * Constructor for the gateway.
+     */
     public function __construct()
     {
         $this->id = 'cheetah';
@@ -37,21 +37,21 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
         $this->method_description = '';
 
         // Timeout after 3 days. Default to 3 days as pending Bitcoin txns
-		// are usually forgotten after 2-3 days.
+        // are usually forgotten after 2-3 days.
 
-		// Load the settings.
-		$this->init_form_fields();
-		$this->init_settings();
+        // Load the settings.
+        $this->init_form_fields();
+        $this->init_settings();
         $this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
-		$this->debug       = 'yes' === $this->get_option( 'debug', 'no' );
+        $this->description = $this->get_option( 'description' );
+        $this->debug       = 'yes' === $this->get_option( 'debug', 'no' );
 
-		self::$log_enabled = $this->debug;
+        self::$log_enabled = $this->debug;
 
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'woocommerce_validate_api_key' ) );
         
-		// add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, '_custom_query_var' ), 10, 2 );
-		// add_action( 'woocommerce_api_wc_gateway_coinbase', array( $this, 'handle_webhook' ) );
+        // add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, '_custom_query_var' ), 10, 2 );
+        // add_action( 'woocommerce_api_wc_gateway_coinbase', array( $this, 'handle_webhook' ) );
     }
 
     public function woocommerce_validate_api_key() {
@@ -105,44 +105,44 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
         echo $html;
     }
     public static function log( $message, $level = 'info' ) {
-		if ( self::$log_enabled ) {
-			if ( empty( self::$log ) ) {
-				self::$log = wc_get_logger();
-			}
-			self::$log->log( $level, $message, array( 'source' => 'cheetah' ) );
-		}
-	}
+        if ( self::$log_enabled ) {
+            if ( empty( self::$log ) ) {
+                self::$log = wc_get_logger();
+            }
+            self::$log->log( $level, $message, array( 'source' => 'cheetah' ) );
+        }
+    }
 
     public function init_form_fields() {
-		$this->form_fields = array(
-			'enabled'        => array(
-				'title'   => __( 'Enable/Disable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable Custom Cheetah Payment', 'cheetah' ),
-				'default' => 'yes',
-			),
-			'title'          => array(
-				'title'       => __( 'Title', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Cheetah', 'cheetah' ),
-				'desc_tip'    => true,
-			),
-			'description'    => array(
-				'title'       => __( 'Description', 'woocommerce' ),
-				'type'        => 'text',
-				'desc_tip'    => true,
-				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Cheetah payment with bitcoin, etherium', 'cheetah' ),
-			),
-			'api_key'        => array(
-				'title'       => __( 'API Key', 'woocommerce' ),
-				'type'        => 'text',
-				'default'     => $this->get_option('custom_cheetah_api_key'),
-				'description' => 'This controls the API key to query server',
-			)
-		);
-	}
+        $this->form_fields = array(
+            'enabled'        => array(
+                'title'   => __( 'Enable/Disable', 'woocommerce' ),
+                'type'    => 'checkbox',
+                'label'   => __( 'Enable Custom Cheetah Payment', 'cheetah' ),
+                'default' => 'yes',
+            ),
+            'title'          => array(
+                'title'       => __( 'Title', 'woocommerce' ),
+                'type'        => 'text',
+                'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+                'default'     => __( 'Cheetah', 'cheetah' ),
+                'desc_tip'    => true,
+            ),
+            'description'    => array(
+                'title'       => __( 'Description', 'woocommerce' ),
+                'type'        => 'text',
+                'desc_tip'    => true,
+                'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
+                'default'     => __( 'Cheetah payment with bitcoin, etherium', 'cheetah' ),
+            ),
+            'api_key'        => array(
+                'title'       => __( 'API Key', 'woocommerce' ),
+                'type'        => 'text',
+                'default'     => $this->get_option('custom_cheetah_api_key'),
+                'description' => 'This controls the API key to query server',
+            )
+        );
+    }
     public function validate_api_key($api_key) {
         $graphql_url = 'https://cheetah-backend.herokuapp.com/graphql';
         $query = 'query { validateApiKey(apiKey : "'.$api_key.'") }';
@@ -176,23 +176,55 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
     }
 
     /**
-	 * Process the payment and return the result.
-	 * @param  int $order_id
-	 * @return array
-	 */
-	public function process_payment( $order_id ) {
-		// Mark order as completed
-		$order = wc_get_order( $order_id );
-		// $order->payment_complete();
-	
-		// Redirect to custom HTML page
-		$redirect_url = home_url().'/cheetah';
-		WC()->session->delete_session('order_id');
-		WC()->session->set('order_id',$order_id);
-		WC()->session->set('order_product',$order);
-		return array(
-			'result' => 'success',
-			'redirect' => $redirect_url
-		);
-	}
+     * Process the payment and return the result.
+     * @param  int $order_id
+     * @return array
+     */
+    public function process_payment( $order_id ) {
+        // Mark order as completed
+        $order = wc_get_order( $order_id );
+        $api_key = get_option('custom_cheetah_api_key');
+        $cancel_url = home_url()."/checkout";
+        $order_key = $order->get_order_key();
+        $success_url = home_url().'/checkout/order-received/'.$order_id.'/?key='.$order_key;
+        
+        $query = '
+          query generateCheckoutUrl($apiKey: String!, $cancelUrl: String, $orderId: Int!, $successUrl: String) {
+            generateCheckoutUrl(apiKey: $apiKey, cancelUrl: $cancelUrl, orderId: $orderId, successUrl: $successUrl)
+          }
+        ';
+        
+        $variables = [
+          'apiKey' => $api_key,
+          'cancelUrl' => $cancel_url,
+          'orderId' => $order_id,
+          'successUrl' => $success_url,
+        ];
+        
+        $response = wp_remote_post(
+          'https://cheetah-backend.herokuapp.com/graphql',
+          [
+            'headers' => [
+              'Content-Type' => 'application/json',
+            ],
+            'body' => json_encode([
+              'query' => $query,
+              'variables' => $variables,
+            ]),
+          ]
+        );
+
+        if (is_wp_error($response)) {
+            return array(
+               'result' => 'fail',
+               "redirect" => home_url()."/checkout"
+            );
+        }
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode($body, true);
+        return array(
+            'result' => 'success',
+            'redirect' => $data['data']['generateCheckoutUrl']
+        );
+    }
 }
