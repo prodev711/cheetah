@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name:  Cheetah
-Plugin URI:   
+Plugin URI:   https://github.com/DigitalAgency711/cheetah
 Description:  A custom payment gateway that allows your customers to pay with ERC20, BEP20, SOL and MATIC network tokens
 Version:      
 Author:       
