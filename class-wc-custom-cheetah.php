@@ -94,7 +94,7 @@ class WC_Custom_Cheetah extends WC_Payment_Gateway {
         }
         if ( get_option( 'custom_cheetah_api_key_error' ) ) {
             $html .= "<tr valign='top'><div class='notice notice-error'>
-                <p> your account is not valid. It's not possible to use this payment method until your update your account</p>
+                <p> Invalid API key. Please enter a valid key.</p>
             </div></tr>";
         } else if ( get_option('custom_cheetah_api_key_success')){
             $html .= "<tr valign ='top'><div class='notice notice-success'>
